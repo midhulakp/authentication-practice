@@ -1,5 +1,6 @@
 import { Schema, model } from "mongoose";
 import bcrypt from "bcryptjs";
+
 const userSchema = new Schema(
   {
     username: {
@@ -17,9 +18,10 @@ const userSchema = new Schema(
     },
     confirmPassword: {
       type: String,
+      required: true,
       validate: {
-        validator: function () {
-          return this.password === this.confirmPassword;
+        validator: function (value) {
+          return this.password === value;
         },
         message: "Password and Confirm Password do not match",
       },
@@ -35,5 +37,10 @@ userSchema.pre("save", async function (next) {
   this.confirmPassword = undefined;
   next();
 });
+
+//methods can be used on instance
+userSchema.methods.verifyPassword = async function (pwd, pwdDb) {
+  return await bcrypt.compare(pwd, pwdDb);
+};
 
 export default model("User", userSchema);

@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import generateToken from "../utils/generateToken.js";
 
 export const register = async (req, res, next) => {
   try {
@@ -15,8 +16,20 @@ export const register = async (req, res, next) => {
       password,
       confirmPassword,
     });
+
+    // let newUser=new User({
+    //     username,
+    //     email,
+    //     password,
+    //     confirmPassword
+    // })
+    // await newUser.save()
+
+    // genereate Token
+
+    let token = await generateToken(newUser._id);
     //sending response
-    res.status(201).json(newUser);
+    res.status(201).json({ newUser, token });
   } catch (err) {
     next(err);
   }
@@ -30,8 +43,19 @@ export const login = async (req, res, next) => {
     if (!existingUser) {
       throw new Error("User doesnt exist,Please Register");
     }
+    //verify password
+    let result = await existingUser.verifyPassword(
+      password,
+      existingUser.password
+    );
+    if (!result) {
+      throw new Error("Password is not correct");
+    }
+    // genereate Token
+
+    let token = await generateToken(existingUser._id);
     //sending response
-    res.status(201).json(existingUser);
+    res.status(201).json({ existingUser, token });
   } catch (err) {
     next(err);
   }
