@@ -13,20 +13,11 @@ export const register = async (req, res, next) => {
     let newUser = await User.create({
       username,
       email,
+      role: req.body?.role || "user",
       password,
       confirmPassword,
     });
-
-    // let newUser=new User({
-    //     username,
-    //     email,
-    //     password,
-    //     confirmPassword
-    // })
-    // await newUser.save()
-
-    // genereate Token
-
+    //generate token
     let token = await generateToken(newUser._id);
     //sending response
     res.status(201).json({ newUser, token });
@@ -51,8 +42,7 @@ export const login = async (req, res, next) => {
     if (!result) {
       throw new Error("Password is not correct");
     }
-    // genereate Token
-
+    //token
     let token = await generateToken(existingUser._id);
     //sending response
     res.status(201).json({ existingUser, token });
